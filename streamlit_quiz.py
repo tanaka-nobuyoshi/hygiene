@@ -34,10 +34,28 @@ def save_result(score, answers, user_id):
     with open("quiz_result.csv", "a", encoding="utf-8-sig", newline="") as f:
         writer = csv.writer(f)
         if not file_exists:
-            writer.writerow(output_header)  # ヘッダーはファイルがなければ書く
+            writer.writerow(output_header)
         writer.writerow(output_row)
 
+def show_admin_download():
+    st.title("管理者用ダウンロード画面")
+    if os.path.exists("quiz_result.csv"):
+        with open("quiz_result.csv", "rb") as f:
+            st.download_button(
+                label="結果CSVをダウンロード",
+                data=f,
+                file_name="quiz_result.csv",
+                mime="text/csv"
+            )
+    else:
+        st.info("結果ファイルがまだありません。")
+
 def main():
+    # 管理者用ダウンロード画面
+    if st.query_params.get("admin", ["0"])[0] == "1":
+        show_admin_download()
+        return
+
     st.title("サイバーセキュリティ サバイバルクイズ")
     user_id = st.query_params.get("user_id", [""])[0]
     if not user_id:
