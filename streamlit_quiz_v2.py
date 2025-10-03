@@ -57,11 +57,12 @@ def show_lines(x, style="markdown"):
 
 def main():
     # コマンドライン引数からデータファイル名を取得
-    if len(sys.argv) > 1:
-        quiz_file = sys.argv[1]
-    else:
-        st.error("クイズデータファイル（JSON）を引数で指定してください。\n例: streamlit run streamlit_quiz_v2.py quiz_data_v2_array.json")
-        return
+    # if len(sys.argv) > 1:
+    #     quiz_file = sys.argv[1]
+    # else:
+    #     st.error("クイズデータファイル（JSON）を引数で指定してください。\n例: streamlit run streamlit_quiz_v2.py quiz_data_v2_array.json")
+    #     return
+    quiz_file = "quiz_data_v2.json"
 
     # 管理者用ダウンロード画面
     if st.query_params.get("admin", ["0"])[0] == "1":
