@@ -56,7 +56,12 @@ def show_lines(x, style="markdown"):
             st.markdown(x)
 
 def main():
-    quiz_file = "quiz_data_v2.json"  # ← ここを直接指定
+    # コマンドライン引数からデータファイル名を取得
+    if len(sys.argv) > 1:
+        quiz_file = sys.argv[1]
+    else:
+        st.error("クイズデータファイル（JSON）を引数で指定してください。\n例: streamlit run streamlit_quiz_v2.py quiz_data_v2_array.json")
+        return
 
     # 管理者用ダウンロード画面
     if st.query_params.get("admin", ["0"])[0] == "1":
@@ -157,16 +162,43 @@ def main():
     if len(questions) == 0:
         show_lines(stage.get("section_title", ""), style="header")
         show_lines(stage.get("section_story", ""))
+        
         if current_stage == ending_index or current_stage == gameover_index:
-            st.info(f"最終スコア: {score}")
-            if not result_saved:
-                save_result(score, answers, user_id)
-                st.session_state["result_saved"] = True
+            if score == 100:
+                # クリア時のお祝い演出
+                st.markdown("""
+                <div style='background:#ffd700;color:#222;padding:24px;border-radius:16px;text-align:center;font-size:2em;'>
+                🎉 <b>MISSION COMPLETE!</b> 🎉<br>
+                シールドポイント：<b>100</b>
+                </div>
+                """, unsafe_allow_html=True)
+                st.success("パーフェクトクリア！あなたのサイバー衛生力は最高レベルです！")
+                if not result_saved:
+                    save_result(score, answers, user_id)
+                    st.session_state["result_saved"] = True
                 st.success("結果をquiz_result.csvに保存しました。")
-            if st.button("終了"):
-                st.session_state.clear()
-                st.rerun()
-            return
+                if st.button("終了"):
+                    st.session_state.clear()
+                    st.rerun()
+                return
+            else:
+                # ゲームオーバー時の演出（例2）
+                st.markdown(f"""
+                <div style='background:#222;color:#fff;padding:24px;border-radius:16px;text-align:center;font-size:2em;'>
+                💥 <b>GAME OVER</b> 💥<br>
+                シールドポイント：<b>{score}</b>
+                </div>
+                """, unsafe_allow_html=True)
+                st.warning("もう一度チャレンジして、サイバー衛生力を高めましょう！")
+                if not result_saved:
+                    save_result(score, answers, user_id)
+                    st.session_state["result_saved"] = True
+                st.success("結果をquiz_result.csvに保存しました。")
+                # 再挑戦ボタン
+                if st.button("再挑戦"):
+                    st.session_state.clear()
+                    st.rerun()
+                return
         else:
             if st.button("スタート"):
                 st.session_state["current_stage"] = current_stage + 1
@@ -210,7 +242,15 @@ def main():
                 st.rerun()
         else:
             show_lines(st.session_state["last_feedback"])
-            st.info(f"現在のスコア: {score}")
+            if score == 100:
+                st.success(f"🟢 シールドMAX！ポイント：{score}")
+            elif score >= 70:
+                st.info(f"🔵 まだまだ戦える！ポイント：{score}")
+            elif score >= 30:
+                st.warning(f"🟠 シールドが危ない！ポイント：{score}")
+            else:
+                st.error(f"🔴 シールドブレイク寸前！ポイント：{score}")
+
             if st.button("次へ"):
                 if current_q + 1 < len(questions):
                     st.session_state["current_q"] = current_q + 1
@@ -223,5 +263,4 @@ def main():
                 st.rerun()
 
 if __name__ == "__main__":
-
     main()
