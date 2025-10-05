@@ -100,7 +100,9 @@ def main():
     questions = quiz_data.get("questions", [])
     if current_q >= len(questions):
         rank = get_rank(score)
-        st.markdown(f"**あなたのランク：{rank}**")
+        emoji = get_rank_emoji(rank)
+
+        st.markdown(f"**あなたのランク：{rank} {emoji}**")
         st.markdown(f"**最終スコア：{score}点**")
         if score == 100:
             st.markdown("""
@@ -112,9 +114,6 @@ def main():
 </div>
 """, unsafe_allow_html=True)
         else:
-            rank = get_rank(score)
-            emoji = get_rank_emoji(rank)
-            st.markdown(f"スコア：{score}点　ランク：{rank} {emoji}")
             st.warning("再チャレンジして、マスターを目指しましょう！")
             if st.button("再チャレンジ"):
                 st.session_state.clear()
@@ -181,10 +180,17 @@ def main():
             st.markdown(f'正解は「{correct_str}」です。')
         feedback = st.session_state["last_feedback"]
         if isinstance(feedback, list):
-            for line in feedback:
-                st.markdown(line)
+            st.markdown(
+                "<div style='line-height:1.2;'>"
+                + "<br>".join(feedback) +
+                "</div>",
+                unsafe_allow_html=True
+            )
         else:
             st.markdown(feedback)
+        # 空行を入れる
+        st.markdown("<br>", unsafe_allow_html=True)
+
         current_rank = get_rank(score)
         if current_rank != st.session_state["previous_rank"]:
             st.markdown(f"スコア：{score}点　ランク：{current_rank} 🎉（ランクアップ）")
