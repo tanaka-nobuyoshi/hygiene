@@ -57,7 +57,13 @@ def main():
     st.markdown("入門者からスタートし、正解するごとにレベルアップ！目指せマスター！")
     st.image(banner_file, width="stretch")
 
-    user_id = st.text_input("研修IDを入力してください")
+
+    params = st.query_params
+    user_id_param = params.get("user_id", "")
+    if user_id_param:
+        user_id = user_id_param
+    else:
+        user_id = st.text_input("研修IDを入力してください")
     if not user_id:
         st.warning("研修IDが必要です")
         return
